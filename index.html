@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <title>Vue Shopping Cart</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="">
+  <meta name="description" content="Check out my shopping cart built with Vue.js during my Vue challenge.">
   <link href="https://fonts.googleapis.com/css?family=Courgette|Lato:400,700" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -15,9 +15,97 @@
         <h1 class="app__title">Muffin &amp; Co</h1>
         <span class="app__tagline">Wish You Muffin but the Best</span>
       </div>
+      <button
+        class="show-cart"
+        type="button"
+        aria-label="Open cart"
+        aria-describedby="cart-tip"
+        @click="showCart = !showCart"
+      >
+        <span
+          :class="['badge', { 'badge--active': totalItems }]"
+          id="cart-tip"
+          role="tooltip"
+          :aria-label="cartLabel"
+        >{{totalItems}}</span>
+        <svg
+          version="1.1"
+          xmlns="http://www.w3.org/2000/svg"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          x="0"
+          y="0"
+          viewBox="0 0 390 390"
+        >
+      		<path d="M375,125h-30h-34.391l-65.036-64.629c-5.878-5.839-15.374-5.809-21.213,0.067c-5.84,5.876-5.81,15.374,0.066,21.213
+      			l43.622,43.348H121.091l44.504-44.405c5.864-5.851,5.875-15.349,0.023-21.213c-5.851-5.864-15.349-5.875-21.213-0.024
+      			l-65.788,65.642H45H15c-8.284,0-15,6.716-15,15s6.716,15,15,15h17.293l27.911,167.418c1.206,7.23,7.461,12.531,14.791,12.533
+      			l240.004,0.074c0.002,0,0.003,0,0.005,0c7.332,0,13.591-5.302,14.796-12.535l27.907-167.491H375c8.284,0,15-6.716,15-15
+      			C390,131.716,383.284,125,375,125z M302.297,305.021l-214.59-0.066L62.708,155h264.586L302.297,305.021z" />
+      		<path d="M113.432,261.682c0.853,7.671,7.348,13.345,14.89,13.345c0.554,0,1.112-0.031,1.676-0.093
+      			c8.233-0.915,14.166-8.331,13.251-16.565l-6.672-60.024c-0.915-8.234-8.326-14.167-16.565-13.251
+      			c-8.233,0.915-14.166,8.331-13.251,16.565L113.432,261.682z" />
+      		<path d="M195,274.988c8.284,0,15-6.716,15-15v-59.986c0-8.284-6.716-15-15-15s-15,6.716-15,15v59.986
+      			C180,268.272,186.716,274.988,195,274.988z" />
+      		<path d="M260.02,274.86c0.563,0.063,1.121,0.093,1.675,0.093c7.542,0,14.037-5.674,14.89-13.345l6.66-59.951
+      			c0.914-8.235-5.019-15.651-13.253-16.565c-8.225-0.913-15.649,5.018-16.564,13.252l-6.66,59.951
+      			C245.853,266.529,251.787,273.945,260.02,274.86z" />
+        </svg>
+      </button>
     </header>
     <main>
       <div class="container">
+        <div class="cart" v-show="showCart">
+          <button
+            class="btn btn--close"
+            type="button"
+            aria-label="Close cart"
+            @click="showCart = !showCart"
+          >
+            <span aria-hidden="true">&#10006;</span>
+          </button>
+          <h3 class="cart__title">Your Cart</h3>
+          <ul class="cart__items">
+            <li class="cart__item cart__row" v-for="item in cart">
+              <div class="cart__item-preview">
+                <img class="cart__item-image" :src="item.image" />
+              </div>
+              <div class="cart__item-details">
+                <div class="cart__item-name">
+                  <span>{{item.name}}</span>
+                  <button
+                    class="btn btn--remove"
+                    type="button"
+                    aria-label="Remove item from cart"
+                    @click="remove(item)"
+                  >
+                    <span aria-hidden="true">&#10006;</span>
+                  </button>
+                </div>
+                <div class="cart__item-price">
+                  {{item.quantity}} x {{item.price | currency}}
+                </div>
+              </div>
+            </li>
+          </ul>
+          <div class="cart__row" v-if="discount">
+            <span>Discount: </span>
+            <span>-{{discount | currency}}</span>
+          </div>
+          <div class="cart__row cart__row--bold cart__row--no-border">
+            <span>Total: {{totalItems | pluralize('muffin')}}</span>
+            <span>{{totalPrice | currency}}</span>
+          </div>
+          <div class="cart__row cart__row--no-border" v-if="cart.length">
+            <button
+              type="button"
+              class="btn btn--payment"
+            >Pay by Card</button>
+            <button
+              type="button"
+              class="btn btn--payment"
+            >Cash on Collection</button>
+          </div>
+        </div>
         <ul class="items">
           <li
             v-for="(item, i) in items"
@@ -33,9 +121,13 @@
               <button
                 class="btn btn--add"
                 type="button"
+                :aria-label="addToCartLabel(item)"
                 @click="add(item)"
               >
-                Add to Cart
+                <span v-if="isInCart(item)">
+                  In Cart ({{isInCart(item).quantity}})
+                </span>
+                <span v-else>Add to Cart</span>
               </button>
               <span class="item__price">{{item.price | currency}}</span>
             </div>

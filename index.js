@@ -1,7 +1,15 @@
+const pluralize = (number, n) => {
+  const name = n || 'item';
+  return (number === 1)
+    ? `${number} ${name}`
+    : `${number} ${name}s`;
+};
+
 const cart = new Vue({
   el: '#app',
   data: {
     cart: [],
+    discount: 0,
     items: [
       {
         id: 1014,
@@ -79,8 +87,68 @@ const cart = new Vue({
     ],
     showCart: false,
   },
-  methods: {},
-  computed: {},
+  methods: {
+    // should be able to reuse it in add() and remove()
+    isInCart: function(item) {
+      return this.cart.find(cart => cart.id === item.id);
+    },
+    add: function(item) {
+      const findItem = cart => cart.id === item.id;
+      const index = this.cart.findIndex(findItem);
+      if (index >= 0) {
+        const newItem = Object.assign(
+          {},
+          this.cart[index],
+          { quantity: this.cart[index].quantity + 1 }
+        );
+        this.cart = [
+          ...this.cart.slice(0, index),
+          newItem,
+          ...this.cart.slice(index + 1),
+        ];
+      } else {
+        const newItem = Object.assign(
+          item,
+          { quantity: 1 }
+        );
+        this.cart.push(newItem);
+      }
+    },
+    remove: function(item) {
+      const findItem = cart => cart.id === item.id;
+      const index = this.cart.findIndex(findItem);
+      this.cart = [
+        ...this.cart.slice(0, index),
+        ...this.cart.slice(index + 1),
+      ];
+    },
+    addToCartLabel: function(item) {
+      if (this.isInCart(item)) {
+        const quantity = this.isInCart(item).quantity;
+        return `Add to cart (${pluralize(quantity, 'item')} already in cart)`;
+      } else {
+        return 'Add to cart';
+      }
+    },
+  },
+  computed: {
+    cartLabel: function() {
+      return `${pluralize(this.totalItems, 'item')} in cart`;
+    },
+    totalPrice: function() {
+      let total = this.cart.reduce((prev, curr) => {
+        return prev + (curr.quantity * curr.price);
+      }, 0);
+
+      // let 'em save some money
+      this.discount = (this.totalItems >= 12) ? (total * 100 / 1000) : 0;
+
+      return (total - this.discount);
+    },
+    totalItems: function() {
+      return this.cart.reduce((prev, curr) => prev + curr.quantity, 0);
+    },
+  },
   filters: {
     currency: function(amount) {
       return amount.toLocaleString('en-GB', {
@@ -88,5 +156,6 @@ const cart = new Vue({
         currency: 'GBP',
       });
     },
+    pluralize: pluralize,
   },
 });
