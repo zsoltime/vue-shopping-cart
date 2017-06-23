@@ -91,6 +91,11 @@
             <span>Discount: </span>
             <span>-{{discount | currency}}</span>
           </div>
+          <div class="cart__row" v-else>
+            <span v-if="totalItems">
+              Add {{(12 - totalItems) | pluralize('more muffin')}} to get 10% off
+            </span>
+          </div>
           <div class="cart__row cart__row--bold cart__row--no-border">
             <span>Total: {{totalItems | pluralize('muffin')}}</span>
             <span>{{totalPrice | currency}}</span>
