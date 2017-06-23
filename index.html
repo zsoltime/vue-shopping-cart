@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Vue Shopping Cart</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="">
+  <link href="https://fonts.googleapis.com/css?family=Courgette|Lato:400,700" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app" id="app">
+    <header class="app__header">
+      <div class="container">
+        <h1 class="app__title">Muffin &amp; Co</h1>
+        <span class="app__tagline">Wish You Muffin but the Best</span>
+      </div>
+    </header>
+    <main>
+      <div class="container">
+        <ul class="items">
+          <li
+            v-for="(item, i) in items"
+            class="item"
+            :key="item.id"
+            :data-index="i"
+          >
+            <h2 class="item__name">{{item.name}}</h2>
+            <div class="item__preview">
+              <img class="item__image" :src="item.image" alt=" " />
+            </div>
+            <div class="item__actions">
+              <button
+                class="btn btn--add"
+                type="button"
+                @click="add(item)"
+              >
+                Add to Cart
+              </button>
+              <span class="item__price">{{item.price | currency}}</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </main>
+    <footer class="app__footer">
+      <div class="container">
+        <p class="copyright">Made by <a class="copyright__link" href="https://zsolti.co" title="Zsolt Meszaros">Zsolt Meszaros</a> as part of his <a href="https://github.com/zsoltime/vue-basic-challenge" title="Vue Challenge">Vue Challenge</a> - Day&nbsp;#5</p>
+      </div>
+    </footer>
+  </div>
+  <script src="https://unpkg.com/vue/dist/vue.js"></script>
+  <script src="index.js"></script>
+</body>
+</html>
