@@ -5,6 +5,31 @@ const pluralize = (number, n) => {
     : `${number} ${name}s`;
 };
 
+const CartStorage = {
+  get: function() {
+    const strItems = localStorage.getItem('zsVueCart');
+    let items;
+
+    try {
+      items = JSON.parse(strItems);
+    } catch (e) {
+      console.error(e.message);
+    }
+
+    return Array.isArray(items) ? items : [];
+  },
+  set: function(updatedItems) {
+    if (Array.isArray(updatedItems)) {
+      localStorage.setItem('zsVueCart', JSON.stringify(updatedItems));
+      return updatedItems;
+    }
+    return undefined;
+  },
+  wipe: function() {
+    localStorage.removeItem('zsVueCart');
+  },
+};
+
 const cart = new Vue({
   el: '#app',
   data: {
@@ -87,14 +112,21 @@ const cart = new Vue({
     ],
     showCart: false,
   },
+  mounted: function() {
+    this.cart = CartStorage.get();
+  },
+  watch: {
+    cart: function(val) {
+      CartStorage.set(val);
+    },
+  },
   methods: {
     // should be able to reuse it in add() and remove()
     isInCart: function(item) {
       return this.cart.find(cart => cart.id === item.id);
     },
     add: function(item) {
-      const findItem = cart => cart.id === item.id;
-      const index = this.cart.findIndex(findItem);
+      const index = this.cart.findIndex(cart => cart.id === item.id);
       if (index >= 0) {
         const newItem = Object.assign(
           {},
@@ -115,8 +147,7 @@ const cart = new Vue({
       }
     },
     remove: function(item) {
-      const findItem = cart => cart.id === item.id;
-      const index = this.cart.findIndex(findItem);
+      const index = this.cart.findIndex(cart => cart.id === item.id);
       this.cart = [
         ...this.cart.slice(0, index),
         ...this.cart.slice(index + 1),
